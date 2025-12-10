@@ -25,7 +25,7 @@ from typing import List, Tuple, Dict, Optional
 
 
 class TSPGeneticAlgorithm:
-    """Genetic algorithm solver for TSP following Ruan et al. Algorithm 2."""
+    """Genetic algorithm solver for TSP following Ruan et al. Algorithm 2"""
 
     def __init__(self, population_size: int, mutation_rate: float, selection_method: str):
         """
@@ -92,7 +92,9 @@ class TSPGeneticAlgorithm:
 
     def roulette_wheel_selection(self, population: List[List[int]], fitness_scores: List[float]) -> List[int]:
         """
-        Roulette wheel selection method from Ruan et al.
+        Roulette wheel selection method:
+        the probability of selecting an individual is directly proportional to its fitness,
+        as in Ruan et al.
 
         Args:
             population: List of routes
@@ -135,6 +137,10 @@ class TSPGeneticAlgorithm:
     def order_crossover(self, parent1: List[int], parent2: List[int]) -> Tuple[List[int], List[int]]:
         """
         Order Crossover (OX) for TSP - preserves relative order.
+        A random crossover point is selected in both parents, and
+        the portion of the route after the crossover point is
+        exchanged between the two parents,
+        as used by Ruan et al.
 
         Args:
             parent1: First parent route
@@ -176,7 +182,9 @@ class TSPGeneticAlgorithm:
 
     def insertion_mutation(self, route: List[int]) -> List[int]:
         """
-        Insertion mutation as used by Ruan et al.
+        Insertion mutation by reversing the route
+        between two randomly selected positions,
+        as used by Ruan et al.
 
         Args:
             route: Route to mutate
