@@ -3,16 +3,12 @@ RL agent implementation for TSP solving.
 """
 
 import numpy as np
-from data.tsplib_loader import TSPLIBLoader
 
 class TSPRLAgent:
     """Reinforcement learning agent for TSP route construction."""
     
-    def __init__(self, config):
+    def __init__(self, data, config):
         # extract the test scenerio data
-        loader = TSPLIBLoader(data_dir = "../../data/problem_instances")
-        instance = config['instance']
-        data = loader.load_instance(instance)
         self.test_data = data
         self.distance_matrix = data['distance_matrix']
         self.name = data['name']
