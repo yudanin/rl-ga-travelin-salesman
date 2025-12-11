@@ -84,7 +84,7 @@ class TSPRLAgent:
         if self.epsilon_greedy_type == 2:
             return 1 - (episode / self.episodes)**6
         else:
-            1 - 0.1 * (np.floor(episode/self.episodes))
+            return 1 - 0.1 * (np.floor(episode/self.episodes))
         
     def train_episode(self, epsiode_num):
         """Generate RL epsiode the RL agent."""
@@ -112,7 +112,7 @@ class TSPRLAgent:
             # update Q-values
             if len(next_visited) == self.dimension:
                 
-                random_choice = np.random.rand()
+                # random_choice = np.random.rand()
                 # if random_choice < 0.5:
                 self.QA[(current_city, action)] = self.QA[current_city, action] + self.alpha * (reward + self.gamma * (self.QB[next_city, 0]) - self.QA[current_city, action])
                 # else:
