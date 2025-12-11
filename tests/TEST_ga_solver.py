@@ -27,7 +27,7 @@ class GATester:
 
         # Ruan et al.'s standard GA parameters
         self.params = {
-            'population_size': 40,
+            'population_size': 100,
             'mutation_rate': 0.01,  # Ruan et al. used 0.01
             'selection_method': 'roulette_wheel',
             'generations': 2000  # As used in Ruan et al.
