@@ -84,7 +84,20 @@ def run_for_instance(instance_name, loader, n, episodes, seed, outdir, config_ov
     # Sort by run index to keep deterministic ordering
     trajectories.sort(key=lambda x: x['run'])
 
-    outpath = Path(outdir) / f"{instance_name}_gamma_{config_overrides['gamma']}_reward_type_{config_overrides['reward_type']}_epsilon_type_{config_overrides['epsilon_greedy_type']}.json"
+    # outpath = Path(outdir) / f"{instance_name}_gamma_{config_overrides['gamma']}_reward_type_{config_overrides['reward_type']}_epsilon_type_{config_overrides['epsilon_greedy_type']}.json"
+    config_str_parts = []
+    if config_overrides:
+        if 'gamma' in config_overrides:
+            config_str_parts.append(f"gamma_{config_overrides['gamma']}")
+        if 'reward_type' in config_overrides:
+            config_str_parts.append(f"reward_type_{config_overrides['reward_type']}")
+        if 'epsilon_greedy_type' in config_overrides:
+            config_str_parts.append(f"epsilon_type_{config_overrides['epsilon_greedy_type']}")
+
+    config_suffix = "_" + "_".join(config_str_parts) if config_str_parts else "_default"
+    outpath = Path(outdir) / f"{instance_name}{config_suffix}_trajectories.json"
+
+
     with open(outpath, 'w') as fh:
         json.dump({'instance': instance_name, 'optimal_value' : optimal_value, 'n': n, 'trajectories': trajectories}, fh, indent=2)
 
@@ -93,7 +106,7 @@ def run_for_instance(instance_name, loader, n, episodes, seed, outdir, config_ov
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description='Run RL experiments to generate trajectories')
-    parser.add_argument('--data-dir', default='data/problem_instances', help='Path to .tsp files')
+    parser.add_argument('--data-dir', default='../data/problem_instances', help='Path to .tsp files')
     parser.add_argument('--n', type=int, default=100, help='Number of trajectories per instance')
     parser.add_argument('--episodes', type=int, default=1000, help='Training episodes per run')
     parser.add_argument('--outdir', default='outputs', help='Directory to save trajectories')

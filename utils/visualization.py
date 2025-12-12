@@ -9,6 +9,7 @@ import pandas as pd
 from typing import Dict, List
 import sys
 import os
+import json
 
 # Path for TSPLIB loader
 sys.path.append('../data')
@@ -64,34 +65,36 @@ class TableBuilder:
     @staticmethod
     def build_table_TSP_instances(data_dir="../data/problem_instances", output_csv=None, print_table=True):
         """
-        Build Table of TSP instances with cities and optimal solutions
-        (Table 1 from Ruan et al.)
+        Build Table 1 using TSPLIBLoader to get all data directly.
 
         Structure:
         Instance    n    Optimal solution
         eil51      51         426
-        berlin52   52        7542
-
-        Reads DIMENSION from .tsp files and calculates optimal distance from .opt.tour files.
 
         Args:
-            data_dir: Path to TSPLIB data directory containing .tsp and .opt.tour files
+            data_dir: Path to TSPLIB data directory
             output_csv: Optional path to save CSV file
             print_table: Whether to print formatted table
 
         Returns:
             pandas.DataFrame with table data
         """
-        print("Building TSP Instances Table")
+        print("Building TSP Instances Table using TSPLIBLoader")
         print("=" * 55)
 
+        # Initialize loader
+        try:
+            loader = TSPLIBLoader(data_dir=data_dir)
+        except Exception as e:
+            print(f"❌ Could not initialize TSPLIBLoader: {e}")
+            return pd.DataFrame()
+
+        # Find all .tsp files
         if not os.path.exists(data_dir):
             print(f"❌ Data directory not found: {data_dir}")
             return pd.DataFrame()
 
-        # Find all .tsp files in the directory
         tsp_files = [f for f in os.listdir(data_dir) if f.endswith('.tsp')]
-
         if not tsp_files:
             print(f"❌ No .tsp files found in {data_dir}")
             return pd.DataFrame()
@@ -102,29 +105,28 @@ class TableBuilder:
 
         for tsp_file in sorted(tsp_files):
             instance_name = tsp_file.replace('.tsp', '')
-            tsp_path = os.path.join(data_dir, tsp_file)
-            tour_path = os.path.join(data_dir, f"{instance_name}.opt.tour")
 
             try:
-                # Read dimension from .tsp file
-                dimension = TableBuilder.read_tsp_dimension(tsp_path)
+                # Load instance using TSPLIBLoader
+                data = loader.load_instance(instance_name)
 
-                # Calculate optimal distance from tour file
-                optimal_distance = None
-                if os.path.exists(tour_path):
-                    optimal_distance = TableBuilder.calculate_optimal_distance(tsp_path, tour_path)
+                # Extract the data we need
+                dimension = data['dimension']
+
+                # Use TSPLIBLoader's internal method to get optimal value
+                optimal_value = loader._get_optimal_value(instance_name)
 
                 table_data.append({
                     'Instance': instance_name,
                     'n': dimension,
-                    'Optimal solution': optimal_distance if optimal_distance else 'N/A'
+                    'Optimal solution': optimal_value if optimal_value else 'N/A'
                 })
 
-                status = f"{optimal_distance}" if optimal_distance else "No tour file"
+                status = f"{optimal_value}" if optimal_value else "No optimal value"
                 print(f"  {instance_name:<12} | {dimension:>3} cities | {status:>12}")
 
             except Exception as e:
-                print(f"  ❌ Error processing {instance_name}: {e}")
+                print(f"  ❌ Error loading {instance_name}: {e}")
                 continue
 
         if not table_data:
@@ -143,52 +145,6 @@ class TableBuilder:
         return df
 
     @staticmethod
-    def calculate_optimal_distance(tsp_path, tour_path):
-        """
-        Read the optimal distance from the COMMENT line in .opt.tour file.
-
-        Example: "COMMENT : Optimal tour for eil51.tsp  (426)" -> returns 426
-
-        Args:
-            tsp_path: Path to .tsp file (not used, kept for compatibility)
-            tour_path: Path to .opt.tour file
-
-        Returns:
-            int: Optimal tour distance from file
-        """
-        with open(tour_path, 'r') as f:
-            for line in f:
-                line = line.strip()
-                if line.startswith('COMMENT'):
-                    # Look for number in parentheses like "(426)"
-                    import re
-                    match = re.search(r'\((\d+)\)', line)
-                    if match:
-                        return int(match.group(1))
-
-        raise ValueError(f"Optimal distance not found in {tour_path}")
-
-    @staticmethod
-    def read_tsp_dimension(tsp_path):
-        """
-        Read the DIMENSION from a .tsp file.
-
-        Args:
-            tsp_path: Path to .tsp file
-
-        Returns:
-            int: Number of cities (dimension)
-        """
-        with open(tsp_path, 'r') as f:
-            for line in f:
-                line = line.strip()
-                if line.startswith('DIMENSION'):
-                    # Format: "DIMENSION: 52" or "DIMENSION : 52"
-                    return int(line.split(':')[1].strip())
-
-        raise ValueError(f"DIMENSION not found in {tsp_path}")
-
-    @staticmethod
     def print_table1_formatted(df):
         """Print Table 1 in Ruan et al. paper format."""
         print(f"\n📋 TABLE 1 - TSP Instances")
@@ -205,7 +161,6 @@ class TableBuilder:
     @staticmethod
     def save_table1_csv(df, filename):
         """Save Table 1 to CSV file."""
-        # Select only the columns that appear in Ruan et al. table
         table_df = df[['Instance', 'n', 'Optimal solution']].copy()
 
         try:
@@ -214,18 +169,87 @@ class TableBuilder:
         except Exception as e:
             print(f"❌ Could not save CSV: {e}")
 
+    @staticmethod
+    def build_table_algorithm_comparison(results_dir="experiments", output_csv=None, print_table=True):
+        """
+        Build Table 2 comparison of algorithm results (similar to Ruan et al.).
 
-def main():
-    """Test the table builder."""
+        Columns:
+        - TSP instances (optimal): eil51(426)
+        - Algorithm: Genetic algorithm, Roulette Wheel selection
+        - Min Cost: 445
+        - Inaccuracy: 4.3
 
-    # Build Table 1 from actual files
-    df = TableBuilder.build_table_TSP_instances(
-        data_dir="../data/problem_instances",
-        output_csv="../results/tsp_instances_table1.csv",
-        print_table=True
-    )
+        Args:
+            results_dir: Directory containing JSON result files
+            output_csv: Optional path to save CSV file
+            print_table: Whether to print formatted table
 
+        Returns:
+            pandas.DataFrame with comparison data
+        """
+        print("Building Algorithm Comparison Table")
+        print("=" * 55)
 
-if __name__ == "__main__":
-    main()
+        # Find JSON result files
+        json_files = [f for f in os.listdir(results_dir) if f.endswith('.json')]
+
+        table_data = []
+
+        for json_file in sorted(json_files):
+            file_path = os.path.join(results_dir, json_file)
+
+            with open(file_path, 'r') as f:
+                data = json.load(f)
+
+            instance = data['instance']
+            optimal_value = data['optimal_value']
+            trajectories = data['trajectories']
+
+            # Find minimum cost
+            min_cost = min(traj['cost'] for traj in trajectories)
+
+            # Calculate inaccuracy percentage
+            inaccuracy = ((min_cost - optimal_value) / optimal_value) * 100
+
+            # Determine algorithm type from filename
+            if 'ga_only' in json_file:
+                algorithm = "Genetic algorithm, Roulette Wheel selection"
+            elif 'rl_ga' in json_file:
+                algorithm = "RL+GA hybrid"
+            else:
+                algorithm = "RL agent"
+
+            table_data.append({
+                'TSP instances (optimal)': f"{instance}({optimal_value})",
+                'Algorithm': algorithm,
+                'Min Cost': int(min_cost),
+                'Inaccuracy': round(inaccuracy, 1)
+            })
+
+        df = pd.DataFrame(table_data)
+
+        if print_table:
+            TableBuilder.print_table2_formatted(df)
+
+        if output_csv:
+            df.to_csv(output_csv, index=False)
+            print(f"✅ Table 2 saved to: {output_csv}")
+
+        return df
+
+    @staticmethod
+    def print_table2_formatted(df):
+        """Print Table 2 in Ruan et al. paper format."""
+
+        print(f"\n📋 TABLE 2 - Algorithm Comparison")
+        print("=" * 80)
+        print(f"{'TSP instances (optimal)':<25} | {'Algorithm':<55} | {'Min Cost':<8} | {'Inaccuracy':<10}")
+        print("-" * 80)
+
+        for _, row in df.iterrows():
+            print(
+                f"{row['TSP instances (optimal)']:<25} | {row['Algorithm']:<55} | {row['Min Cost']:<8} | {row['Inaccuracy']}%")
+
+        print("=" * 80)
 

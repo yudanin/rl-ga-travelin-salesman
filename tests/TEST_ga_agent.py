@@ -14,7 +14,7 @@ sys.path.append('../data')
 sys.path.append('../algorithms/genetic_algorithm')
 
 from data.tsplib_loader import TSPLIBLoader
-from algorithms.genetic_algorithm.ga_solver import TSPGeneticAlgorithm
+from algorithms.genetic_algorithm.ga_agent import TSPGeneticAlgorithm
 
 
 class GATester:

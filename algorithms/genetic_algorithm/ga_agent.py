@@ -118,11 +118,13 @@ class TSPGeneticAlgorithm:
                 return population[i].copy()
 
         # Fallback (should not happen)
+        print("roulette_wheel_selection: does not return anything")
         return population[-1].copy()
 
     def elitist_selection(self, population: List[List[int]], fitness_scores: List[float]) -> List[int]:
         """
-        Elitist selection method (enhancement from proposal).
+        Elitist selection method through Tournament selection
+        (enhancement to Ruan et al)
 
         Args:
             population: List of routes
@@ -131,7 +133,11 @@ class TSPGeneticAlgorithm:
         Returns:
             Best route from population
         """
-        best_idx = np.argmax(fitness_scores)
+        #best_idx = np.argmax(fitness_scores)
+        #return population[best_idx].copy()
+        tournament_size = 5
+        indices = random.sample(range(len(population)), tournament_size)
+        best_idx = max(indices, key=lambda i: fitness_scores[i])
         return population[best_idx].copy()
 
     def order_crossover(self, parent1: List[int], parent2: List[int]) -> Tuple[List[int], List[int]]:
@@ -222,15 +228,24 @@ class TSPGeneticAlgorithm:
         """
         parents = []
 
-        for _ in range(self.population_size):
-            if self.selection_method == 'roulette_wheel':
-                parent = self.roulette_wheel_selection(population, fitness_scores)
-            elif self.selection_method == 'elitist':
-                parent = self.elitist_selection(population, fitness_scores)
-            else:
-                # Default to roulette wheel
-                parent = self.roulette_wheel_selection(population, fitness_scores)
-            parents.append(parent)
+        # Choose selection method
+        if self.selection_method == 'elitist':
+            selection_func = self.elitist_selection
+        else:
+            selection_func = self.roulette_wheel_selection
+
+        # Select pairs of parents for crossover
+        for _ in range(self.population_size // 2):
+            parent1 = selection_func(population, fitness_scores)
+            parent2 = selection_func(population, fitness_scores)
+
+            # Ensure the parents are different
+            attempts = 0
+            while parent2 == parent1 and attempts < 10:
+                parent2 = selection_func(population, fitness_scores)
+                attempts += 1
+
+            parents.extend([parent1, parent2])
 
         return parents
 
@@ -285,6 +300,9 @@ class TSPGeneticAlgorithm:
             if generation >= generations - 1:
                 break
 
+            # Save the best individual before crossover/mutation
+            elite = population[best_gen_idx].copy()
+
             # Step 5: Selection operation
             parents = self.select_parents(population, fitness_scores)
 
@@ -310,7 +328,8 @@ class TSPGeneticAlgorithm:
                 mutated = self.insertion_mutation(individual)
                 mutated_population.append(mutated)
 
-            population = mutated_population[:self.population_size]
+            #population = mutated_population[:self.population_size]
+            population = [elite] + mutated_population[:self.population_size - 1]
 
         return {
             'best_route': self.best_route,
