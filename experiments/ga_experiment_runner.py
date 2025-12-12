@@ -29,11 +29,17 @@ def list_instances(data_dir):
 
 
 def generate_random_initial_routes(dimension, population_size):
-    """Generate random initial routes for GA (since we're testing GA only)."""
+    """Generate random initial routes for GA (for GA-only algorithm).
+       Starts with 1, end with 1
+    """
     routes = []
     for _ in range(population_size):
-        route = list(range(1, dimension + 1))  # 1-indexed cities
-        random.shuffle(route)
+        # 1-indexed cities excluding the fixed start city (1)
+        inner_cities = list(range(2, dimension + 1))
+        random.shuffle(inner_cities)
+
+        # Create the N+1 route: [1] + [shuffled N-1 cities] + [1]
+        route = [1] + inner_cities + [1]
         routes.append(route)
     return routes
 
