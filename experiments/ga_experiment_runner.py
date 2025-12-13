@@ -47,10 +47,10 @@ def generate_random_initial_routes(dimension, population_size):
 def _single_run_worker(args_tuple):
     """Module-level helper for ProcessPoolExecutor (must be picklable).
 
-    args_tuple: (instance_name, data_dir, generations, seed, run_index, ga_config)
+    args_tuple: (instance_name, data_dir, generations, seed, run_index, ga_config, initial_routes)
     Returns a serializable dict with run result.
     """
-    instance_name, data_dir, generations, seed, run_index, ga_config = args_tuple
+    instance_name, data_dir, generations, seed, run_index, ga_config, initial_routes = args_tuple
 
     # Each worker creates its own loader to avoid shared state
     loader = TSPLIBLoader(data_dir=data_dir)
@@ -62,15 +62,9 @@ def _single_run_worker(args_tuple):
 
     # Initialize GA with config parameters
     ga = TSPGeneticAlgorithm(
-        population_size=ga_config.get('population_size'),
-        mutation_rate=ga_config.get('mutation_rate', 0.01),
-        selection_method=ga_config.get('selection_method', 'roulette_wheel')
-    )
-
-    # Generate random initial routes (GA-only approach)
-    initial_routes = generate_random_initial_routes(
-        data['dimension'],
-        ga_config.get('population_size')
+        population_size=ga_config['population_size'],
+        mutation_rate=ga_config['mutation_rate'],
+        selection_method=ga_config['selection_method']
     )
 
     # Run evolution
@@ -90,26 +84,26 @@ def _single_run_worker(args_tuple):
     }
 
 
-def run_for_instance(instance_name, loader, n, generations, seed, outdir, ga_config=None, workers=None):
+def run_for_instance(instance_name, loader, n, generations, seed, outdir, ga_config, initial_routes, workers=None):
     """Run `n` independent GA evolution runs and save results. Runs are executed in parallel.
-
-    - `workers` controls the max number of worker processes (defaults to os.cpu_count()).
+    Args:
+        instance_name: Name of TSP instance
+        loader: TSPLIBLoader instance
+        n: Number of runs
+        generations: Number of GA generations per run
+        seed: Base random seed
+        outdir: Output directory
+        ga_config: GA configuration dict (required, no defaults)
+        initial_routes: List of initial routes for GA population
+        workers: Number of worker processes (defaults to os.cpu_count())
     """
     data_dir = loader.data_dir
     data = loader.load_instance(instance_name)
     optimal_value = data.get('optimal_value', None)
     trajectories = []
 
-    # Default GA config if none provided
-    if ga_config is None:
-        ga_config = {
-            'population_size': 40,
-            'mutation_rate': 0.01,
-            'selection_method': 'roulette_wheel'
-        }
-
     # Build args for each run
-    tasks = [(instance_name, data_dir, generations, seed, run, ga_config) for run in range(n)]
+    tasks = [(instance_name, data_dir, generations, seed, run, ga_config, initial_routes) for run in range(n)]
 
     max_workers = workers or os.cpu_count() or 1
     with ProcessPoolExecutor(max_workers=max_workers) as exe:
@@ -127,17 +121,8 @@ def run_for_instance(instance_name, loader, n, generations, seed, outdir, ga_con
     trajectories.sort(key=lambda x: x['run'])
 
     # Build filename with GA config info
-    config_str_parts = []
-    if ga_config:
-        if 'population_size' in ga_config and ga_config['population_size'] != 40:
-            config_str_parts.append(f"pop_{ga_config['population_size']}")
-        if 'mutation_rate' in ga_config and ga_config['mutation_rate'] != 0.01:
-            config_str_parts.append(f"mut_{ga_config['mutation_rate']}")
-        if 'selection_method' in ga_config and ga_config['selection_method'] != 'roulette_wheel':
-            config_str_parts.append(f"sel_{ga_config['selection_method']}")
-
-    config_suffix = "_" + "_".join(config_str_parts) if config_str_parts else ""
-    outpath = Path(outdir) / f"{instance_name}_ga_only{config_suffix}_evolved_trajectories.json"
+    config_suffix = f"_sel_{ga_config['selection_method']}_pop_{ga_config['population_size']}_mut_{ga_config['mutation_rate']}"
+    outpath = Path(outdir) / f"{instance_name}_ga_only{config_suffix}.json"
 
     with open(outpath, 'w') as fh:
         json.dump({
@@ -151,21 +136,19 @@ def run_for_instance(instance_name, loader, n, generations, seed, outdir, ga_con
 
 
 def main(argv=None):
+
     parser = argparse.ArgumentParser(description='Run GA experiments to generate evolved trajectories')
     parser.add_argument('--data-dir', default='../data/problem_instances', help='Path to .tsp files')
     parser.add_argument('--n', type=int, default=100, help='Number of trajectories per instance')
     parser.add_argument('--generations', type=int, default=2000, help='GA generations per run')
     parser.add_argument('--outdir', default='../outputs', help='Directory to save trajectories')
     parser.add_argument('--seed', type=int, default=42, help='Base RNG seed')
-    parser.add_argument('--instances', default=None,
-                        help='Comma-separated list of instance names to run (without .tsp)')
+    parser.add_argument('--instances', default=None, help='Comma-separated list of instance names to run (without .tsp)')
     parser.add_argument('--workers', type=int, default=None, help='Number of worker processes for parallel runs')
 
     # GA-specific parameters
     parser.add_argument('--population-size', type=int, default=100, help='GA population size')
     parser.add_argument('--mutation-rate', type=float, default=0.01, help='GA mutation rate')
-    parser.add_argument('--selection-method', default='roulette_wheel',
-                        choices=['roulette_wheel', 'elitist'], help='GA selection method')
 
     args = parser.parse_args(argv)
 
@@ -179,25 +162,44 @@ def main(argv=None):
     else:
         instances = list(list_instances(args.data_dir))
 
-    # Build GA configuration
-    ga_config = {
-        'population_size': args.population_size,
-        'mutation_rate': args.mutation_rate,
-        'selection_method': args.selection_method
-    }
+    # Define parameter combinations (all as lists for future extensibility)
+    ga_selection_methods = ['roulette_wheel', 'elitist']
+    ga_mutation_rates = [args.mutation_rate]
+    ga_population_sizes = [args.population_size]
 
-    print(f"GA Configuration: {ga_config}")
-    print(f"Generations: {args.generations}")
-
+    # Pre-generate initial routes for each instance (same routes used across all GA configs)
+    initial_routes_by_instance = {}
+    random.seed(args.seed)
     for instance in instances:
-        print(f"Running GA for instance: {instance} (n={args.n}, generations={args.generations})")
-        try:
-            run_for_instance(
-                instance, loader, args.n, args.generations, args.seed,
-                args.outdir, ga_config, workers=args.workers
-            )
-        except Exception as e:
-            print(f"Error while processing {instance}: {e}")
+        data = loader.load_instance(instance)
+        initial_routes_by_instance[instance] = generate_random_initial_routes(
+            data['dimension'],
+            args.population_size
+        )
+
+    for selection_method in ga_selection_methods:
+        for mutation_rate in ga_mutation_rates:
+            for population_size in ga_population_sizes:
+
+                # Build GA configuration
+                ga_config = {
+                    'population_size': population_size,
+                    'mutation_rate': mutation_rate,
+                    'selection_method': selection_method
+                }
+
+                print(f"GA Configuration: {ga_config}")
+                print(f"Generations: {args.generations}")
+
+                for instance in instances:
+                    print(f"Running GA for instance: {instance} (n={args.n}, generations={args.generations})")
+                    try:
+                        run_for_instance(
+                            instance, loader, args.n, args.generations, args.seed,
+                            args.outdir, ga_config, initial_routes_by_instance[instance], workers=args.workers
+                        )
+                    except Exception as e:
+                        print(f"Error while processing {instance}: {e}")
 
     # results table
     df = TableBuilder.build_table_algorithm_comparison(

@@ -150,62 +150,6 @@ class TSPGeneticAlgorithm:
         best_idx = max(indices, key=lambda i: fitness_scores[i])
         return population[best_idx].copy()
 
-    # def order_crossover(self, parent1: List[int], parent2: List[int]) -> Tuple[List[int], List[int]]:
-    #     """
-    #     Order Crossover (OX) for TSP - preserves relative order.
-    #     A random crossover point is selected in both parents, and
-    #     the portion of the route after the crossover point is
-    #     exchanged between the two parents,
-    #     as used by Ruan et al.
-    #     Rtesdtircted to indices 1 to n-1 to make sure the route starts and ends in city 1.
-    #
-    #     Args:
-    #         parent1: First parent route
-    #         parent2: Second parent route
-    #
-    #     Returns:
-    #         Two child routes
-    #     """
-    #     n = len(parent1)
-    #     if n < 4:
-    #         return parent1.copy(), parent2.copy()
-    #
-    #     # Choose two random crossover points between index 1 and n-1
-    #     start, end = sorted(random.sample(range(1, n), 2))
-    #
-    #     # Create children
-    #     child1 = [-1] * n
-    #     child2 = [-1] * n
-    #     child1[0] = parent1[0]
-    #     child1[n-1] = parent1[n-1]
-    #     child2[0] = parent2[0]
-    #     child2[n-1] = parent2[n-1]
-    #
-    #     # Copy segments between crossover points
-    #     child1[start:end + 1] = parent1[start:end + 1]
-    #     child2[start:end + 1] = parent2[start:end + 1]
-    #
-    #     # Fill remaining positions maintaining order
-    #     def fill_child(child, other_parent, segment_start, segment_end):
-    #         # Get cities not in the copied segment
-    #         segment_cities = set(child[segment_start:segment_end + 1])
-    #
-    #         # The 'remaining' list must contain cities from 'other_parent' that are:
-    #         # 1. NOT in the copied segment
-    #         # 2. NOT City 1 (since City 1 is fixed at child[0])
-    #         remaining = [city for city in other_parent if city not in segment_cities and city != 1]
-    #
-    #         # Fill remaining positions in order
-    #         pos = 0
-    #         for i in range(1, n-1):
-    #             if child[i] == -1:
-    #                 child[i] = remaining[pos]
-    #                 pos += 1
-    #
-    #     fill_child(child1, parent2, start, end)
-    #     fill_child(child2, parent1, start, end)
-    #
-    #     return child1, child2
 
     def order_crossover(self, parent1: List[int], parent2: List[int]) -> Tuple[List[int], List[int]]:
         """

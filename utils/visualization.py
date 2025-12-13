@@ -214,11 +214,15 @@ class TableBuilder:
 
             # Determine algorithm type from filename
             if 'ga_only' in json_file:
-                algorithm = "Genetic algorithm, Roulette Wheel selection"
+                algorithm = "Genetic algorithm"
             elif 'rl_ga' in json_file:
                 algorithm = "RL+GA hybrid"
             else:
                 algorithm = "RL agent"
+            if 'roulette_wheel' in json_file:
+                algorithm += ', Roulette Wheel selection'
+            if 'elitist' in json_file:
+                algorithm += ', Elitist selection'
 
             table_data.append({
                 'TSP instances (optimal)': f"{instance}({optimal_value})",
