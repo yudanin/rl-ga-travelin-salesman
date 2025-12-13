@@ -1,11 +1,12 @@
 {
-    
+
     "alpha": 0.01,
     "gamma": 0.01,
     "episodes": 10000,
-    "instance" : "eil51",
+    "instance" : "kroA100",
     "reward_type" : 1,
     "epsilon_greedy_type" : 1,
-    "method": "double_q_learning"
+    "method": "q_learning"
+
 
 }

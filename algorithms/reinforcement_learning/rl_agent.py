@@ -23,6 +23,8 @@ class TSPRLAgent:
         self.episodes = config.get('episodes', 1000)
         self.reward_type = config.get('reward_type', 1)
         self.epsilon_greedy_type = config.get('epsilon_greedy_type',1)
+        self.method = config.get('method','double_q_learning')
+        print(f"Initialized TSPRLAgent for instance {self.name} with method {self.method}")
 
         # initialize our Q tables
         self.QA = np.zeros([self.dimension, self.dimension]) # Q-value table
@@ -112,19 +114,28 @@ class TSPRLAgent:
             # update Q-values
             if len(next_visited) == self.dimension:
                 
-                # random_choice = np.random.rand()
-                # if random_choice < 0.5:
-                self.QA[(current_city, action)] = self.QA[current_city, action] + self.alpha * (reward + self.gamma * (self.QB[next_city, 0]) - self.QA[current_city, action])
-                # else:
-                self.QB[(current_city, action)] = self.QB[current_city, action] + self.alpha * (reward + self.gamma * (self.QA[next_city, 0]) - self.QB[current_city, action])
-                self.done = True
+                if self.method == 'q_learning':
+                    self.QA[(current_city, action)] = self.QA[current_city, action] + self.alpha * (reward + self.gamma * (self.QA[next_city, 0]) - self.QA[current_city, action])
+                    self.QB = self.QA
+                elif self.method == 'double_q_learning':
+                    self.QA[(current_city, action)] = self.QA[current_city, action] + self.alpha * (reward + self.gamma * (self.QB[next_city, 0]) - self.QA[current_city, action])
+                    # else:
+                    self.QB[(current_city, action)] = self.QB[current_city, action] + self.alpha * (reward + self.gamma * (self.QA[next_city, 0]) - self.QB[current_city, action])
+                    self.done = True
+                elif self.method == 'sarsa':
+                    self.QA[(current_city, action)] = self.QA[current_city, action] + self.alpha * (reward + self.gamma * (self.QA[next_city, 0]) - self.QA[current_city, action])
+                    self.QB = self.QA
             else:
-                random_choice = np.random.rand()
-                # if random_choice < 0.5:
-                self.QA[(current_city, action)] = self.QA[current_city, action] + self.alpha * (reward + self.gamma * max(self.QB[next_city, a] for a in self.action_space(next_visited)) - self.QA[current_city, action])
-                # else:
-                self.QB[(current_city, action)] = self.QB[current_city, action] + self.alpha * (reward + self.gamma * max(self.QA[next_city, a] for a in self.action_space(next_visited)) - self.QB[current_city, action])
-            
+                if self.method == 'q_learning':
+                    self.QA[(current_city, action)] = self.QA[current_city, action] + self.alpha * (reward + self.gamma * max(self.QA[next_city, a] for a in self.action_space(next_visited)) - self.QA[current_city, action])
+                    self.QB = self.QA
+                elif self.method == 'double_q_learning':
+                    self.QA[(current_city, action)] = self.QA[current_city, action] + self.alpha * (reward + self.gamma * max(self.QB[next_city, a] for a in self.action_space(next_visited)) - self.QA[current_city, action])
+                    self.QB[(current_city, action)] = self.QB[current_city, action] + self.alpha * (reward + self.gamma * max(self.QA[next_city, a] for a in self.action_space(next_visited)) - self.QB[current_city, action])
+                elif self.method == 'sarsa':
+                    next_action = self.epsilon_greedy_policy(epsilon, next_city, next_visited)
+                    self.QA[(current_city, action)] = self.QA[current_city, action] + self.alpha * (reward + self.gamma * (self.QA[next_city, next_action]) - self.QA[current_city, action])
+                    self.QB = self.QA
             # increment state
             current_city = next_city
             visited = next_visited
