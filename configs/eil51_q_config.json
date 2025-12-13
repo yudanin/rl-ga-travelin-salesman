@@ -6,6 +6,6 @@
     "instance" : "eil51",
     "reward_type" : 1,
     "epsilon_greedy_type" : 1,
-    "method": "double_q_learning"
+    "method": "q_learning"
 
 }

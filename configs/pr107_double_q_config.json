@@ -5,6 +5,8 @@
     "episodes": 10000,
     "instance" : "pr107",
     "reward_type" : 1,
-    "epsilon_greedy_type" : 1
+    "epsilon_greedy_type" : 1,
+    "method": "double_q_learning"
+
 
 }

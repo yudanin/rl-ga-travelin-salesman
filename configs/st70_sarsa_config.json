@@ -3,9 +3,9 @@
     "alpha": 0.01,
     "gamma": 0.01,
     "episodes": 10000,
-    "instance" : "eil51",
+    "instance" : "st70",
     "reward_type" : 1,
-    "epsilon_greedy_type" : 1,
-    "method": "double_q_learning"
+    "epsilon_greedy_type" : 3,
+    "method": "sarsa"
 
 }
