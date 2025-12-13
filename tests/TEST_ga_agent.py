@@ -14,7 +14,7 @@ sys.path.append('../data')
 sys.path.append('../algorithms/genetic_algorithm')
 
 from data.tsplib_loader import TSPLIBLoader
-from algorithms.genetic_algorithm.ga_solver import TSPGeneticAlgorithm
+from algorithms.genetic_algorithm.ga_agent import TSPGeneticAlgorithm
 
 
 class GATester:
@@ -27,7 +27,7 @@ class GATester:
 
         # Ruan et al.'s standard GA parameters
         self.params = {
-            'population_size': 40,
+            'population_size': 100,
             'mutation_rate': 0.01,  # Ruan et al. used 0.01
             'selection_method': 'roulette_wheel',
             'generations': 2000  # As used in Ruan et al.

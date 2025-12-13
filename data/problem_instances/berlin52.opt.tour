@@ -1,4 +1,5 @@
 NAME : berlin52.opt.tour
+COMMENT : Optimal tour for berlin52.opt.tour  (7542)
 TYPE : TOUR
 DIMENSION : 52
 TOUR_SECTION

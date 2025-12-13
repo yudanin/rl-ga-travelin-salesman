@@ -93,7 +93,7 @@ def run_for_instance(instance_name, loader, n, episodes, seed, outdir, config_ov
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description='Run RL experiments to generate trajectories')
-    parser.add_argument('--data-dir', default='data/problem_instances', help='Path to .tsp files')
+    parser.add_argument('--data-dir', default='../data/problem_instances', help='Path to .tsp files')
     parser.add_argument('--n', type=int, default=100, help='Number of trajectories per instance')
     parser.add_argument('--episodes', type=int, default=1000, help='Training episodes per run')
     parser.add_argument('--outdir', default='outputs', help='Directory to save trajectories')
