@@ -1,11 +1,11 @@
 {
-
+    
     "alpha": 0.01,
     "gamma": 0.01,
     "episodes": 10000,
     "instance" : "berlin52",
     "reward_type" : 2,
     "epsilon_greedy_type" : 2,
-    "method": "q_learning"
+    "method": "sarsa"
 
 }
