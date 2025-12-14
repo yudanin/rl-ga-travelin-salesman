@@ -18,8 +18,11 @@ Parameter combinations:
 import argparse
 import json
 import os
+import random
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
+
+from datetime import datetime, timezone
 
 from data.tsplib_loader import TSPLIBLoader
 from utils.visualization import TableBuilder
@@ -29,12 +32,17 @@ from experiments.rl_experiment_runner import (
     list_instances,
     run_for_instance as run_rl_for_instance
 )
-from experiments.ga_experiment_runner import _single_run_worker as ga_single_run_worker
+
+from experiments.ga_experiment_runner import (
+    _single_run_worker as ga_single_run_worker,
+    generate_random_initial_routes,
+    run_for_instance as run_ga_for_instance
+)
 
 
 def validate_rl_config(rl_config):
     """Validate that all required RL config parameters are present."""
-    required_keys = ['episodes', 'alpha', 'gamma', 'reward_type', 'epsilon_greedy_type']
+    required_keys = ['episodes', 'alpha', 'gamma', 'reward_type', 'epsilon_greedy_type', 'method']
     for key in required_keys:
         if key not in rl_config:
             raise ValueError(f"RL config missing required parameter: {key}")
@@ -51,11 +59,12 @@ def validate_ga_config(ga_config):
 def get_rl_output_filename(instance_name, rl_config):
     """Generate RL output filename based on config."""
     return (
-        f"{instance_name}"
+        f"{instance_name}_rl_only"
+        f"_rl_method_{rl_config['method']}"
         f"_gamma_{rl_config['gamma']}"
         f"_reward_type_{rl_config['reward_type']}"
         f"_epsilon_type_{rl_config['epsilon_greedy_type']}"
-        f"_trajectories.json"
+        f".json"
     )
 
 
@@ -63,6 +72,7 @@ def get_hybrid_output_filename(instance_name, rl_config, ga_config):
     """Generate hybrid output filename based on configs."""
     return (
         f"{instance_name}_rl_ga"
+        f"_rl_method_{rl_config['method']}"
         f"_rl_gamma_{rl_config['gamma']}"
         f"_reward_type_{rl_config['reward_type']}"
         f"_epsilon_type_{rl_config['epsilon_greedy_type']}"
@@ -152,10 +162,19 @@ def main(argv=None):
     parser.add_argument('--generations', type=int, default=2000, help='GA generations per run')
     parser.add_argument('--outdir', default='../outputs', help='Directory to save trajectories')
     parser.add_argument('--seed', type=int, default=42, help='Base RNG seed')
-    parser.add_argument('--instances', default=None, help='Comma-separated list of instance names to run (without .tsp)')
+    parser.add_argument('--instances', default=None,
+                        help='Comma-separated list of instance names to run (without .tsp)')
     parser.add_argument('--workers', type=int, default=None, help='Number of worker processes for parallel runs')
 
     args = parser.parse_args(argv)
+
+    # Record start time
+    start_time = datetime.now(timezone.utc)
+    print(f"Start time: {start_time.strftime('%Y-%m-%d %H:%M:%S UTC')}")
+
+    # Create new directory for experimental outputs
+    timestamp = datetime.now(timezone.utc).strftime('%Y-%m-%d_%H-%M-%S_UTC')
+    args.outdir = os.path.join(os.path.dirname(__file__), timestamp)
     os.makedirs(args.outdir, exist_ok=True)
 
     loader = TSPLIBLoader(data_dir=args.data_dir)
@@ -175,74 +194,131 @@ def main(argv=None):
     rl_reward_types = [1]
     rl_epsilon_greedy_types = [1]
     rl_alphas = [0.01]
-    rl_episodes_list = [1000]
+    rl_episodes_list = [10000]
+    methods = ['q_learning', 'double_q_learning', 'sarsa']
 
     # GA parameters
-    ga_population_sizes = [40]
+    ga_population_sizes = [100]
     ga_selection_methods = ['roulette_wheel', 'elitist']
     ga_mutation_rates = [0.01]
 
     # =========================================================================
-    # Phase 1: Run RL for all parameter combinations
+    # Phase 1: Run GA for all parameter combinations
     # =========================================================================
 
     print("=" * 70)
-    print("PHASE 1: Running RL experiments")
+    print("PHASE 1: Running GA-only experiments")
+    print("=" * 70)
+
+    from experiments.ga_experiment_runner import generate_random_initial_routes
+    from experiments.ga_experiment_runner import run_for_instance as run_ga_for_instance
+
+    # Pre-generate initial routes for each instance (same routes used across all GA configs)
+    initial_routes_by_instance = {}
+    random.seed(args.seed)
+    for instance in instances:
+        data = loader.load_instance(instance)
+        initial_routes_by_instance[instance] = generate_random_initial_routes(
+            data['dimension'],
+            ga_population_sizes[0]
+        )
+
+    num_ga_out_files = 0
+    for selection_method in ga_selection_methods:
+        for mutation_rate in ga_mutation_rates:
+            for population_size in ga_population_sizes:
+
+                # Build GA configuration
+                ga_config = {
+                    'population_size': population_size,
+                    'mutation_rate': mutation_rate,
+                    'selection_method': selection_method
+                }
+
+                print(f"GA Configuration: {ga_config}")
+                print(f"Generations: {args.generations}")
+
+                for instance in instances:
+                    print(f"Running GA for instance: {instance} (n={args.n}, generations={args.generations})")
+                    try:
+                        run_ga_for_instance(
+                            instance, loader, args.n, args.generations, args.seed,
+                            args.outdir, ga_config, initial_routes_by_instance[instance], workers=args.workers
+                        )
+                    except Exception as e:
+                        print(f"Error while processing {instance}: {e}")
+
+                    num_ga_out_files += 1
+
+    print("\n" + "=" * 70)
+    print(f"PHASE 1 COMPLETE: Generated {num_ga_out_files} GA output files")
+    print("=" * 70 + "\n")
+
+    # =========================================================================
+    # Phase 2: Run RL for all parameter combinations
+    # =========================================================================
+
+    print("=" * 70)
+    print("PHASE 2: Running RL experiments")
     print("=" * 70)
 
     rl_output_files = []  # Track all RL output files with their configs
 
-    for gamma in rl_gammas:
-        for reward_type in rl_reward_types:
-            for epsilon_greedy_type in rl_epsilon_greedy_types:
-                for alpha in rl_alphas:
-                    for episodes in rl_episodes_list:
+    for method in methods:
+        for gamma in rl_gammas:
+            for reward_type in rl_reward_types:
+                for epsilon_greedy_type in rl_epsilon_greedy_types:
+                    for alpha in rl_alphas:
+                        for episodes in rl_episodes_list:
 
-                        rl_config = {
-                            'gamma': gamma,
-                            'reward_type': reward_type,
-                            'epsilon_greedy_type': epsilon_greedy_type,
-                            'alpha': alpha,
-                            'episodes': episodes
-                        }
+                            rl_config = {
+                                'gamma': gamma,
+                                'reward_type': reward_type,
+                                'epsilon_greedy_type': epsilon_greedy_type,
+                                'alpha': alpha,
+                                'episodes': episodes,
+                                'method': method
+                            }
 
-                        validate_rl_config(rl_config)
+                            validate_rl_config(rl_config)
 
-                        print("-" * 70)
-                        print(f"RL Config: gamma={gamma}, reward_type={reward_type}, "
-                              f"epsilon_type={epsilon_greedy_type}, alpha={alpha}, episodes={episodes}")
-                        print("-" * 70)
+                            print("-" * 70)
+                            print(f"RL Config: gamma={gamma}, reward_type={reward_type}, "
+                                  f"epsilon_type={epsilon_greedy_type}, alpha={alpha}, episodes={episodes}")
+                            print("-" * 70)
 
-                        for instance in instances:
-                            print(f"Running RL for instance: {instance} (n={args.n})")
-                            try:
-                                # Use imported run_rl_for_instance from rl_experiment_runner
-                                run_rl_for_instance(
-                                    instance, loader, args.n, episodes, args.seed,
-                                    args.outdir, rl_config, workers=args.workers
-                                )
+                            for instance in instances:
+                                print(f"Running RL for instance: {instance} (n={args.n})")
+                                try:
+                                    # Use imported run_rl_for_instance from rl_experiment_runner
+                                    run_rl_for_instance(
+                                        instance, loader, args.n, episodes, args.seed,
+                                        args.outdir, rl_config, workers=args.workers
+                                    )
 
-                                # Track output file path
-                                outpath = Path(args.outdir) / get_rl_output_filename(instance, rl_config)
-                                rl_output_files.append({
-                                    'path': outpath,
-                                    'instance': instance,
-                                    'rl_config': rl_config.copy()
-                                })
-                            except Exception as e:
-                                print(f"Error while processing {instance}: {e}")
+                                    # Track output file path
+                                    outpath = Path(args.outdir) / get_rl_output_filename(instance, rl_config)
+                                    rl_output_files.append({
+                                        'path': outpath,
+                                        'instance': instance,
+                                        'rl_config': rl_config.copy()
+                                    })
+                                except Exception as e:
+                                    print(f"Error while processing {instance}: {e}")
 
     print("\n" + "=" * 70)
-    print(f"PHASE 1 COMPLETE: Generated {len(rl_output_files)} RL output files")
+    print(f"PHASE 2 COMPLETE: Generated {len(rl_output_files)} RL output files")
     print("=" * 70 + "\n")
 
     # =========================================================================
-    # Phase 2: Run GA on all RL outputs for all GA parameter combinations
+    # Phase 3: Run GA on all RL outputs for all GA parameter combinations
     # =========================================================================
 
     print("=" * 70)
-    print("PHASE 2: Running GA experiments on RL outputs")
+    print("PHASE 3: Running GA experiments on RL outputs")
     print("=" * 70)
+
+    ga_population_sizes = [40]  # for combined RL+GA
 
     hybrid_output_files = []
 
@@ -280,16 +356,22 @@ def main(argv=None):
                         print(f"Error while processing {instance}: {e}")
 
     print("\n" + "=" * 70)
-    print(f"PHASE 2 COMPLETE: Generated {len(hybrid_output_files)} hybrid output files")
+    print(f"PHASE 3 COMPLETE: Generated {len(hybrid_output_files)} hybrid output files")
     print("=" * 70 + "\n")
 
     print("All hybrid experiments completed.\n")
+
+    end_time = datetime.now(timezone.utc)
+    elapsed = end_time - start_time
+    print(f"End time: {end_time.strftime('%Y-%m-%d %H:%M:%S UTC')}")
+    print(f"Total elapsed time: {elapsed}")
 
     # results table
     df = TableBuilder.build_table_algorithm_comparison(
         results_dir=args.outdir,
         output_csv="../results/tsp_instances_table2.csv",
         print_table=True)
+
 
 
 if __name__ == '__main__':

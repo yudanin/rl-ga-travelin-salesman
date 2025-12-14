@@ -10,6 +10,7 @@ from typing import Dict, List
 import sys
 import os
 import json
+import re
 
 # Path for TSPLIB loader
 sys.path.append('../data')
@@ -170,15 +171,53 @@ class TableBuilder:
             print(f"❌ Could not save CSV: {e}")
 
     @staticmethod
+    def parse_algorithm_description(json_file):
+        """
+        Parse algorithm description from filename using a mapping dictionary.
+        """
+        # Mapping: pattern -> display format (--value-- is replaced with extracted value)
+        param_mappings = [
+            # Algorithm type (order matters - check these first)
+            ('rl_ga_', 'RL+GA'),
+            ('rl_only_', 'RL'),
+            ('ga_only_', 'GA'),
+            # RL parameters
+            ('rl_method_([a-z_]+?)_gamma', 'Method=--value--'),
+            ('gamma_([\d.]+)', 'Gamma=--value--'),
+            ('reward_type_(\d+)', 'Reward=--value--'),
+            ('epsilon_type_(\d+)', 'Epsilon=--value--'),
+            # GA parameters
+            ('sel_roulette_wheel', 'Roulette'),
+            ('sel_elitist', 'Elitist'),
+            ('pop_(\d+)', 'Pop=--value--'),
+            ('mut_([\d.]+)', 'Mut=--value--'),
+        ]
+
+        parts = []
+
+        for pattern, display in param_mappings:
+            if '--value--' in display:
+                # Pattern has a capture group
+                match = re.search(pattern, json_file)
+                if match:
+                    parts.append(display.replace('--value--', match.group(1)))
+            else:
+                # Simple pattern match
+                if re.search(pattern, json_file):
+                    parts.append(display)
+
+        return ', '.join(parts) if parts else 'Unknown'
+
+    @staticmethod
     def build_table_algorithm_comparison(results_dir="experiments", output_csv=None, print_table=True):
         """
         Build Table 2 comparison of algorithm results (similar to Ruan et al.).
 
         Columns:
         - TSP instances (optimal): eil51(426)
-        - Algorithm: Genetic algorithm, Roulette Wheel selection
+        - Algorithm: Description based on filename parameters
         - Min Cost: 445
-        - Inaccuracy: 4.3
+        - Inaccuracy: 4.3%
 
         Args:
             results_dir: Directory containing JSON result files
@@ -194,42 +233,53 @@ class TableBuilder:
         # Find JSON result files
         json_files = [f for f in os.listdir(results_dir) if f.endswith('.json')]
 
+        if not json_files:
+            print(f"❌ No JSON files found in {results_dir}")
+            return pd.DataFrame()
+
         table_data = []
 
         for json_file in sorted(json_files):
             file_path = os.path.join(results_dir, json_file)
 
-            with open(file_path, 'r') as f:
-                data = json.load(f)
+            try:
+                with open(file_path, 'r') as f:
+                    data = json.load(f)
 
-            instance = data['instance']
-            optimal_value = data['optimal_value']
-            trajectories = data['trajectories']
+                instance = data['instance']
+                optimal_value = data['optimal_value']
+                trajectories = data['trajectories']
 
-            # Find minimum cost
-            min_cost = min(traj['cost'] for traj in trajectories)
+                # Find minimum cost
+                min_cost = min(traj['cost'] for traj in trajectories)
 
-            # Calculate inaccuracy percentage
-            inaccuracy = ((min_cost - optimal_value) / optimal_value) * 100
+                # Calculate average cost
+                avg_cost = sum(traj['cost'] for traj in trajectories) / len(trajectories)
 
-            # Determine algorithm type from filename
-            if 'ga_only' in json_file:
-                algorithm = "Genetic algorithm"
-            elif 'rl_ga' in json_file:
-                algorithm = "RL+GA hybrid"
-            else:
-                algorithm = "RL agent"
-            if 'roulette_wheel' in json_file:
-                algorithm += ', Roulette Wheel selection'
-            if 'elitist' in json_file:
-                algorithm += ', Elitist selection'
+                # Calculate inaccuracy percentage
+                if optimal_value and optimal_value > 0:
+                    inaccuracy = ((min_cost - optimal_value) / optimal_value) * 100
+                else:
+                    inaccuracy = None
 
-            table_data.append({
-                'TSP instances (optimal)': f"{instance}({optimal_value})",
-                'Algorithm': algorithm,
-                'Min Cost': int(min_cost),
-                'Inaccuracy': round(inaccuracy, 1)
-            })
+                # Parse algorithm description from filename
+                algorithm = TableBuilder.parse_algorithm_description(json_file)
+
+                table_data.append({
+                    'TSP instances (optimal)': f"{instance}({optimal_value})" if optimal_value else instance,
+                    'Algorithm': algorithm,
+                    'Min Cost': int(min_cost),
+                    'Avg Cost': int(avg_cost),
+                    'Inaccuracy': round(inaccuracy, 1) if inaccuracy is not None else 'N/A'
+                })
+
+            except Exception as e:
+                print(f"❌ Error processing {json_file}: {e}")
+                continue
+
+        if not table_data:
+            print("❌ No valid result files found")
+            return pd.DataFrame()
 
         df = pd.DataFrame(table_data)
 
@@ -237,8 +287,11 @@ class TableBuilder:
             TableBuilder.print_table2_formatted(df)
 
         if output_csv:
-            df.to_csv(output_csv, index=False)
-            print(f"✅ Table 2 saved to: {output_csv}")
+            try:
+                df.to_csv(output_csv, index=False)
+                print(f"✅ Table 2 saved to: {output_csv}")
+            except Exception as e:
+                print(f"❌ Could not save CSV: {e}")
 
         return df
 
@@ -247,13 +300,15 @@ class TableBuilder:
         """Print Table 2 in Ruan et al. paper format."""
 
         print(f"\n📋 TABLE 2 - Algorithm Comparison")
-        print("=" * 80)
-        print(f"{'TSP instances (optimal)':<25} | {'Algorithm':<55} | {'Min Cost':<8} | {'Inaccuracy':<10}")
-        print("-" * 80)
+        print("=" * 130)
+        print(
+            f"{'TSP instances (optimal)':<25} | {'Algorithm':<70} | {'Min Cost':<8} | {'Avg Cost':<8} | {'Inaccuracy':<10}")
+        print("-" * 130)
 
         for _, row in df.iterrows():
+            inaccuracy_str = f"{row['Inaccuracy']}%" if row['Inaccuracy'] != 'N/A' else 'N/A'
             print(
-                f"{row['TSP instances (optimal)']:<25} | {row['Algorithm']:<55} | {row['Min Cost']:<8} | {row['Inaccuracy']}%")
+                f"{row['TSP instances (optimal)']:<25} | {row['Algorithm']:<70} | {row['Min Cost']:<8} | {row['Avg Cost']:<8} | {inaccuracy_str:<10}")
 
-        print("=" * 80)
+        print("=" * 130)
 

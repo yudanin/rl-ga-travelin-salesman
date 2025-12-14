@@ -283,9 +283,10 @@ class TSPGeneticAlgorithm:
         # Track evolution
         self.fitness_history = []
         generation_stats = []
+        cost_per_gen = []
 
         for generation in range(generations):
-            # Step 4: Calculate fitness
+            # Calculate fitness
             fitness_scores = []
             for route in population:
                 fitness = self.calculate_fitness(route, distance_matrix)
@@ -295,6 +296,9 @@ class TSPGeneticAlgorithm:
             best_gen_fitness = max(fitness_scores)
             best_gen_idx = fitness_scores.index(best_gen_fitness)
             best_gen_distance = 1.0 / best_gen_fitness if best_gen_fitness > 0 else float('inf')
+
+            # add to cost
+            cost_per_gen.append(best_gen_distance)
 
             if best_gen_distance < self.best_distance:
                 self.best_distance = best_gen_distance
@@ -310,7 +314,7 @@ class TSPGeneticAlgorithm:
                 'best_distance': 1.0 / best_gen_fitness if best_gen_fitness > 0 else float('inf')
             })
 
-            # Step 10: Check termination condition
+            # Check termination condition
             if generation >= generations - 1:
                 break
 
@@ -320,7 +324,7 @@ class TSPGeneticAlgorithm:
             # Step 5: Selection operation
             parents = self.select_parents(population, fitness_scores)
 
-            # Step 6-7: Crossover operations
+            # Crossover operations
             new_population = []
 
             # Apply crossover to pairs of parents
@@ -336,13 +340,12 @@ class TSPGeneticAlgorithm:
                     # Odd number of parents, carry over last one
                     new_population.append(parents[i])
 
-            # Step 8-9: Mutation operations
+            # Mutation operations
             mutated_population = []
             for individual in new_population:
                 mutated = self.insertion_mutation(individual)
                 mutated_population.append(mutated)
 
-            #population = mutated_population[:self.population_size]
             population = [elite] + mutated_population[:self.population_size - 1]
 
         return {
@@ -350,5 +353,6 @@ class TSPGeneticAlgorithm:
             'best_distance': self.best_distance,
             'fitness_history': self.fitness_history,
             'generation_stats': generation_stats,
-            'final_population': population
+            'final_population': population,
+            'cost_per_gen': cost_per_gen
         }

@@ -80,7 +80,8 @@ def _single_run_worker(args_tuple):
     return {
         'run': run_index,
         'cost': float(best_distance),
-        'route': route_1based
+        'route': route_1based,
+        'cost_per_gen': result['cost_per_gen']
     }
 
 
