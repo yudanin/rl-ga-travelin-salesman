@@ -61,6 +61,368 @@ class TSPVisualizer:
         """Generate publication-ready figures."""
         pass
 
+    def plot_best_trajectory_from_results(self, results_json_path: str, data_dir: str = "data/problem_instances",
+                                         instance_name: str = None, title: str = None, savepath: str = None,
+                                         show: bool = True):
+        """Load an experiments JSON file, find the trajectory with minimum cost, and plot it.
+
+        Args:
+            results_json_path: Path to a results JSON produced by the experiment runner.
+            data_dir: Directory containing TSPLIB `.tsp` files (used by `TSPLIBLoader`).
+            instance_name: Optional override of the instance name stored in results JSON.
+            title: Optional plot title. If None, a sensible default is used.
+            savepath: If provided, save the figure to this path.
+            show: If True, call `plt.show()`; otherwise return the figure and axes.
+
+        Returns:
+            (fig, ax) tuple when `show` is False, otherwise None.
+        """
+        # Load results JSON
+        try:
+            with open(results_json_path, 'r') as fh:
+                results = json.load(fh)
+        except Exception as e:
+            print(f"❌ Could not read results file {results_json_path}: {e}")
+            return None
+
+        inst = instance_name or results.get('instance')
+        if not inst:
+            print("❌ Instance name not found in results and no override provided")
+            return None
+
+        trajectories = results.get('trajectories', [])
+        if not trajectories:
+            print(f"❌ No trajectories found in {results_json_path}")
+            return None
+
+        # Find min-cost trajectory
+        best = min(trajectories, key=lambda t: t.get('cost', float('inf')))
+        best_cost = best.get('cost')
+        best_route = best.get('route')  # expected to be 1-based node IDs
+
+        if not best_route:
+            print("❌ Best trajectory has no route data")
+            return None
+
+        # Load instance coordinates using TSPLIBLoader
+        try:
+            loader = TSPLIBLoader(data_dir=data_dir)
+            data = loader.load_instance(inst)
+            coords = data['coordinates']  # mapping: node_id (1-based) -> (x,y)
+        except Exception as e:
+            print(f"❌ Could not load instance {inst} from {data_dir}: {e}")
+            return None
+
+        # Build ordered lists of points from route
+        xs = []
+        ys = []
+        labels = []
+        for node in best_route:
+            # route may already be 1-based; ensure int
+            node_id = int(node)
+            xy = coords.get(node_id)
+            if xy is None:
+                print(f"⚠️ Missing coordinates for node {node_id}; skipping")
+                continue
+            x, y = xy
+            xs.append(x)
+            ys.append(y)
+            labels.append(node_id)
+
+        if not xs:
+            print("❌ No valid coordinates to plot")
+            return None
+
+        # Use Plotly for interactive, higher-quality visuals. Fall back to HTML if image export fails.
+        try:
+            import plotly.graph_objects as go
+        except Exception:
+            print("❌ Plotly is not installed. Please `pip install plotly` to use this function.")
+            return None
+
+        # Ensure cost is a float and round to 2 decimals for title
+        try:
+            cost_val = float(best_cost)
+        except Exception:
+            cost_val = best_cost
+
+        plot_title = title or f"Best route for {inst} — cost={cost_val:.2f}"
+
+        # Build Plotly figure: line + markers + labels
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=xs,
+            y=ys,
+            mode='lines+markers+text',
+            text=[str(l) for l in labels],
+            textposition='top right',
+            marker=dict(size=8),
+            line=dict(width=2)
+        ))
+
+        fig.update_layout(
+            title=plot_title,
+            xaxis_title='X',
+            yaxis_title='Y',
+            showlegend=False,
+            autosize=False,
+            width=700,
+            height=500,
+            template='plotly_white'
+        )
+
+        # Save if requested. Prefer image (PNG) via kaleido; fallback to HTML if not available.
+        if savepath:
+            try:
+                # Attempt to write an image (requires kaleido)
+                fig.write_image(savepath)
+                print(f"✅ Figure saved to {savepath}")
+            except Exception as e:
+                print(f"⚠️ Could not write image to {savepath} (image engine missing). Falling back to HTML: {e}")
+                # Fallback: save HTML (append .html if same extension)
+                html_path = savepath
+                if not str(html_path).lower().endswith('.html'):
+                    html_path = str(savepath) + '.html'
+                try:
+                    fig.write_html(html_path)
+                    print(f"✅ Figure saved as HTML to {html_path}")
+                except Exception as ee:
+                    print(f"❌ Could not save fallback HTML to {html_path}: {ee}")
+
+        if show:
+            try:
+                fig.show()
+            except Exception as e:
+                print(f"⚠️ Could not display figure inline: {e}")
+            return None
+
+        return fig
+
+    def plot_convergence_comparison(self, results_dir: str, instance_name: str = None,
+                                     savepath: str = None, show: bool = True):
+        """Compare convergence rates between GA-only and RL+GA methods.
+
+        Scans `results_dir` for JSON files, finds GA-only and RL+GA pairs that differ only in
+        the method name (e.g., 'berlin52_ga_only_...' paired with 'berlin52_rl_ga_...'). For each
+        pair, finds the best trajectory (lowest final cost) and plots its cost_per_gen convergence
+        curve. Uses Plotly for interactive plots.
+
+        Args:
+            results_dir: Directory containing experiment result JSON files.
+            instance_name: Optional filter to compare only a specific instance (e.g., 'berlin52').
+                          If None, finds and plots all available pairs.
+            savepath: If provided, save the figure to this path (PNG or fallback HTML).
+            show: If True, display the figure; otherwise return the Plotly figure object.
+
+        Returns:
+            Plotly figure object if show=False, otherwise None.
+        """
+        try:
+            import plotly.graph_objects as go
+        except Exception:
+            print("❌ Plotly is not installed. Please `pip install plotly` to use this function.")
+            return None
+
+        # Find all JSON files
+        if not os.path.exists(results_dir):
+            print(f"❌ Results directory not found: {results_dir}")
+            return None
+
+        json_files = [f for f in os.listdir(results_dir) if f.endswith('.json')]
+        if not json_files:
+            print(f"❌ No JSON files found in {results_dir}")
+            return None
+
+        # Parse filenames to find GA-only and RL+GA pairs
+        ga_only_files = {}
+        rl_ga_files = {}
+
+        for fname in json_files:
+            if '_ga_only_' in fname:
+                # Extract base name (everything before '_ga_only_')
+                base = fname.split('_ga_only_')[0]
+                ga_only_files[base] = fname
+            elif '_rl_ga_' in fname:
+                # Extract base name (everything before '_rl_ga_')
+                base = fname.split('_rl_ga_')[0]
+                rl_ga_files[base] = fname
+
+        # Find matching pairs
+        pairs = []
+        for base_name in ga_only_files:
+            if base_name in rl_ga_files:
+                # Optional: filter by instance name
+                if instance_name and not base_name.startswith(instance_name):
+                    continue
+                pairs.append((base_name, ga_only_files[base_name], rl_ga_files[base_name]))
+
+        if not pairs:
+            print(f"❌ No GA-only/RL+GA pairs found in {results_dir}" +
+                  (f" for instance '{instance_name}'" if instance_name else ""))
+            return None
+
+        # If multiple pairs, just plot the first one (or all on subplots)
+        # For simplicity, we'll plot all pairs on a single figure with subplots if there are many
+        num_pairs = len(pairs)
+        print(f"✅ Found {num_pairs} GA-only/RL+GA pair(s): {[p[0] for p in pairs]}")
+
+        # Create Plotly subplots
+        try:
+            from plotly.subplots import make_subplots
+        except Exception:
+            print("❌ Could not import plotly.subplots")
+            return None
+
+        if num_pairs == 1:
+            # Single pair: use a simple figure
+            fig = go.Figure()
+        else:
+            # Multiple pairs: use subplots (2 columns, ceil(num_pairs/2) rows)
+            rows = (num_pairs + 1) // 2
+            cols = 2
+            fig = make_subplots(
+                rows=rows,
+                cols=cols,
+                subplot_titles=[f"{p[0]}" for p in pairs],
+                shared_yaxes=False,
+                vertical_spacing=0.12,
+                horizontal_spacing=0.1
+            )
+
+        # Process each pair
+        for pair_idx, (base_name, ga_file, rl_ga_file) in enumerate(pairs):
+            ga_path = os.path.join(results_dir, ga_file)
+            rl_ga_path = os.path.join(results_dir, rl_ga_file)
+
+            try:
+                with open(ga_path, 'r') as f:
+                    ga_data = json.load(f)
+                with open(rl_ga_path, 'r') as f:
+                    rl_ga_data = json.load(f)
+            except Exception as e:
+                print(f"⚠️ Could not load pair {base_name}: {e}")
+                continue
+
+            # Find best trajectory in each file (lowest final cost)
+            ga_trajs = ga_data.get('trajectories', [])
+            rl_ga_trajs = rl_ga_data.get('trajectories', [])
+
+            if not ga_trajs or not rl_ga_trajs:
+                print(f"⚠️ No trajectories found in pair {base_name}")
+                continue
+
+            ga_best = min(ga_trajs, key=lambda t: t.get('cost', float('inf')))
+            rl_ga_best = min(rl_ga_trajs, key=lambda t: t.get('cost', float('inf')))
+
+            ga_cost_per_gen = ga_best.get('cost_per_gen', [])
+            rl_ga_cost_per_gen = rl_ga_best.get('cost_per_gen', [])
+
+            if not ga_cost_per_gen or not rl_ga_cost_per_gen:
+                print(f"⚠️ No cost_per_gen data for pair {base_name}")
+                continue
+
+            # Prepare data
+            ga_gens = list(range(len(ga_cost_per_gen)))
+            rl_ga_gens = list(range(len(rl_ga_cost_per_gen)))
+
+            # Format costs for display
+            ga_final_cost = float(ga_best.get('cost', 0))
+            rl_ga_final_cost = float(rl_ga_best.get('cost', 0))
+
+            # Determine subplot position
+            if num_pairs == 1:
+                row, col = None, None
+            else:
+                row = (pair_idx // cols) + 1
+                col = (pair_idx % cols) + 1
+
+            # Add traces
+            if num_pairs == 1:
+                fig.add_trace(go.Scatter(
+                    x=ga_gens,
+                    y=ga_cost_per_gen,
+                    mode='lines',
+                    name=f'GA-only (final cost={ga_final_cost:.2f})',
+                    line=dict(width=2)
+                ))
+                fig.add_trace(go.Scatter(
+                    x=rl_ga_gens,
+                    y=rl_ga_cost_per_gen,
+                    mode='lines',
+                    name=f'RL+GA (final cost={rl_ga_final_cost:.2f})',
+                    line=dict(width=2)
+                ))
+            else:
+                fig.add_trace(go.Scatter(
+                    x=ga_gens,
+                    y=ga_cost_per_gen,
+                    mode='lines',
+                    name=f'GA-only (cost={ga_final_cost:.2f})',
+                    line=dict(width=2),
+                    showlegend=(pair_idx == 0)  # Only show legend for first trace
+                ), row=row, col=col)
+                fig.add_trace(go.Scatter(
+                    x=rl_ga_gens,
+                    y=rl_ga_cost_per_gen,
+                    mode='lines',
+                    name=f'RL+GA (cost={rl_ga_final_cost:.2f})',
+                    line=dict(width=2),
+                    showlegend=(pair_idx == 0)
+                ), row=row, col=col)
+
+                # Update axes for subplots
+                fig.update_xaxes(title_text="Generation", row=row, col=col)
+                fig.update_yaxes(title_text="Cost", row=row, col=col)
+
+        # Update layout
+        if num_pairs == 1:
+            title = f"Convergence Comparison: GA-only vs RL+GA ({pairs[0][0]})"
+            fig.update_layout(
+                title=title,
+                xaxis_title='Generation',
+                yaxis_title='Cost',
+                template='plotly_white',
+                hovermode='x unified',
+                width=800,
+                height=500,
+                showlegend=True
+            )
+        else:
+            title = f"Convergence Comparison: GA-only vs RL+GA (All Instances)"
+            fig.update_layout(
+                title=title,
+                template='plotly_white',
+                hovermode='closest',
+                width=1200,
+                height=400 * ((num_pairs + 1) // 2),
+                showlegend=True
+            )
+
+        # Save if requested
+        if savepath:
+            try:
+                fig.write_image(savepath)
+                print(f"✅ Figure saved to {savepath}")
+            except Exception as e:
+                print(f"⚠️ Could not write image to {savepath}. Falling back to HTML: {e}")
+                html_path = savepath
+                if not str(html_path).lower().endswith('.html'):
+                    html_path = str(savepath) + '.html'
+                try:
+                    fig.write_html(html_path)
+                    print(f"✅ Figure saved as HTML to {html_path}")
+                except Exception as ee:
+                    print(f"❌ Could not save fallback HTML to {html_path}: {ee}")
+
+        if show:
+            try:
+                fig.show()
+            except Exception as e:
+                print(f"⚠️ Could not display figure inline: {e}")
+            return None
+
+        return fig
+
 
 class TableBuilder:
     @staticmethod
