@@ -84,7 +84,7 @@ def run_for_instance(instance_name, loader, n, episodes, seed, outdir, config_ov
     # Sort by run index to keep deterministic ordering
     trajectories.sort(key=lambda x: x['run'])
 
-    outpath = Path(outdir) / f"{config_overrides['method']}_{instance_name}_gamma_{config_overrides['gamma']}_reward_type_{config_overrides['reward_type']}_epsilon_type_{config_overrides['epsilon_greedy_type']}.json"
+    outpath = Path(outdir) / f"{instance_name}_rl_only_rl_method_{config_overrides['method']}_gamma_{config_overrides['gamma']}_reward_type_{config_overrides['reward_type']}_epsilon_type_{config_overrides['epsilon_greedy_type']}.json"
     with open(outpath, 'w') as fh:
         json.dump({'instance': instance_name, 'optimal_value' : optimal_value, 'n': n, 'trajectories': trajectories}, fh, indent=2)
 

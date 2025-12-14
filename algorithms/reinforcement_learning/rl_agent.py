@@ -23,8 +23,8 @@ class TSPRLAgent:
         self.episodes = config.get('episodes', 1000)
         self.reward_type = config.get('reward_type', 1)
         self.epsilon_greedy_type = config.get('epsilon_greedy_type',1)
-        self.method = config.get('method','double_q_learning')
-        print(f"Initialized TSPRLAgent for instance {self.name} with method {self.method}")
+        self.method = config.get('method', 'double_q_learning')
+        #print(f"Initialized TSPRLAgent for instance {self.name} with method {self.method}")
 
         # initialize our Q tables
         self.QA = np.zeros([self.dimension, self.dimension]) # Q-value table
@@ -101,7 +101,7 @@ class TSPRLAgent:
         for state in range(1,self.dimension):
             self.QA[state, 0] = self.reward(state, 0)
             self.QB[state, 0] = self.reward(state, 0)
-        
+
         # loop until episode is done
         while not self.done:
             
