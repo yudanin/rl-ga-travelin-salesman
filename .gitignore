@@ -21,9 +21,6 @@ wheels/
 *.egg
 
 # Results and logs
-results/
-logs/
-*.log
 
 # Jupyter
 .ipynb_checkpoints
