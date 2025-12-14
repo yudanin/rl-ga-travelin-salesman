@@ -1,0 +1,175 @@
+TSP instances (optimal),Algorithm,Min Cost,Avg Cost,Inaccuracy
+berlin52(7542),"GA, Elitist, Pop=100, Mut=0.01.",8115,8787,7.6
+berlin52(7542),"GA, Roulette, Pop=100, Mut=0.01.",8882,10090,17.8
+berlin52(7542),"RL+GA, Method=double_q_learning_rl, Gamma=0.01, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",7917,8243,5.0
+berlin52(7542),"RL+GA, Method=double_q_learning_rl, Gamma=0.01, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",7823,8329,3.7
+berlin52(7542),"RL+GA, Method=double_q_learning_rl, Gamma=0.15, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",7998,8479,6.1
+berlin52(7542),"RL+GA, Method=double_q_learning_rl, Gamma=0.15, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",7798,8351,3.4
+berlin52(7542),"RL+GA, Method=double_q_learning_rl, Gamma=0.3, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",7950,8627,5.4
+berlin52(7542),"RL+GA, Method=double_q_learning_rl, Gamma=0.3, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",7914,8677,4.9
+berlin52(7542),"RL+GA, Method=q_learning_rl, Gamma=0.01, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",7917,8243,5.0
+berlin52(7542),"RL+GA, Method=q_learning_rl, Gamma=0.01, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",7823,8329,3.7
+berlin52(7542),"RL+GA, Method=q_learning_rl, Gamma=0.15, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",7998,8479,6.1
+berlin52(7542),"RL+GA, Method=q_learning_rl, Gamma=0.15, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",7798,8351,3.4
+berlin52(7542),"RL+GA, Method=q_learning_rl, Gamma=0.3, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",7950,8627,5.4
+berlin52(7542),"RL+GA, Method=q_learning_rl, Gamma=0.3, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",7914,8677,4.9
+berlin52(7542),"RL+GA, Method=sarsa_rl, Gamma=0.01, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",7885,8247,4.5
+berlin52(7542),"RL+GA, Method=sarsa_rl, Gamma=0.01, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",7835,8332,3.9
+berlin52(7542),"RL+GA, Method=sarsa_rl, Gamma=0.15, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",7968,8495,5.7
+berlin52(7542),"RL+GA, Method=sarsa_rl, Gamma=0.15, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",8041,8431,6.6
+berlin52(7542),"RL+GA, Method=sarsa_rl, Gamma=0.3, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",7907,8404,4.8
+berlin52(7542),"RL+GA, Method=sarsa_rl, Gamma=0.3, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",7856,8427,4.2
+berlin52(7542),"RL, Method=double_q_learning, Gamma=0.01, Reward=1, Epsilon=1",8665,9061,14.9
+berlin52(7542),"RL, Method=double_q_learning, Gamma=0.15, Reward=1, Epsilon=1",9047,10396,20.0
+berlin52(7542),"RL, Method=double_q_learning, Gamma=0.3, Reward=1, Epsilon=1",9564,10389,26.8
+berlin52(7542),"RL, Method=q_learning, Gamma=0.01, Reward=1, Epsilon=1",8665,9061,14.9
+berlin52(7542),"RL, Method=q_learning, Gamma=0.15, Reward=1, Epsilon=1",9047,10396,20.0
+berlin52(7542),"RL, Method=q_learning, Gamma=0.3, Reward=1, Epsilon=1",9564,10389,26.8
+berlin52(7542),"RL, Method=sarsa, Gamma=0.01, Reward=1, Epsilon=1",8644,9037,14.6
+berlin52(7542),"RL, Method=sarsa, Gamma=0.15, Reward=1, Epsilon=1",9403,10149,24.7
+berlin52(7542),"RL, Method=sarsa, Gamma=0.3, Reward=1, Epsilon=1",8951,10284,18.7
+eil51(426),"GA, Elitist, Pop=100, Mut=0.01.",449,484,5.4
+eil51(426),"GA, Roulette, Pop=100, Mut=0.01.",495,565,16.2
+eil51(426),"RL+GA, Method=double_q_learning_rl, Gamma=0.01, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",436,456,2.3
+eil51(426),"RL+GA, Method=double_q_learning_rl, Gamma=0.01, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",431,453,1.2
+eil51(426),"RL+GA, Method=double_q_learning_rl, Gamma=0.15, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",437,458,2.6
+eil51(426),"RL+GA, Method=double_q_learning_rl, Gamma=0.15, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",441,460,3.5
+eil51(426),"RL+GA, Method=double_q_learning_rl, Gamma=0.3, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",443,459,4.0
+eil51(426),"RL+GA, Method=double_q_learning_rl, Gamma=0.3, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",440,460,3.3
+eil51(426),"RL+GA, Method=q_learning_rl, Gamma=0.01, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",436,456,2.3
+eil51(426),"RL+GA, Method=q_learning_rl, Gamma=0.01, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",431,453,1.2
+eil51(426),"RL+GA, Method=q_learning_rl, Gamma=0.15, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",437,458,2.6
+eil51(426),"RL+GA, Method=q_learning_rl, Gamma=0.15, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",441,460,3.5
+eil51(426),"RL+GA, Method=q_learning_rl, Gamma=0.3, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",443,459,4.0
+eil51(426),"RL+GA, Method=q_learning_rl, Gamma=0.3, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",440,460,3.3
+eil51(426),"RL+GA, Method=sarsa_rl, Gamma=0.01, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",433,452,1.6
+eil51(426),"RL+GA, Method=sarsa_rl, Gamma=0.01, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",426,447,0.0
+eil51(426),"RL+GA, Method=sarsa_rl, Gamma=0.15, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",436,456,2.3
+eil51(426),"RL+GA, Method=sarsa_rl, Gamma=0.15, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",431,446,1.2
+eil51(426),"RL+GA, Method=sarsa_rl, Gamma=0.3, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",443,456,4.0
+eil51(426),"RL+GA, Method=sarsa_rl, Gamma=0.3, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",434,461,1.9
+eil51(426),"RL, Method=double_q_learning, Gamma=0.01, Reward=1, Epsilon=1",491,537,15.3
+eil51(426),"RL, Method=double_q_learning, Gamma=0.15, Reward=1, Epsilon=1",482,541,13.1
+eil51(426),"RL, Method=double_q_learning, Gamma=0.3, Reward=1, Epsilon=1",483,557,13.4
+eil51(426),"RL, Method=q_learning, Gamma=0.01, Reward=1, Epsilon=1",491,537,15.3
+eil51(426),"RL, Method=q_learning, Gamma=0.15, Reward=1, Epsilon=1",482,541,13.1
+eil51(426),"RL, Method=q_learning, Gamma=0.3, Reward=1, Epsilon=1",483,557,13.4
+eil51(426),"RL, Method=sarsa, Gamma=0.01, Reward=1, Epsilon=1",479,534,12.4
+eil51(426),"RL, Method=sarsa, Gamma=0.15, Reward=1, Epsilon=1",482,535,13.1
+eil51(426),"RL, Method=sarsa, Gamma=0.3, Reward=1, Epsilon=1",484,551,13.6
+eil76(538),"GA, Elitist, Pop=100, Mut=0.01.",654,703,21.6
+eil76(538),"GA, Roulette, Pop=100, Mut=0.01.",776,977,44.2
+eil76(538),"RL+GA, Method=double_q_learning_rl, Gamma=0.01, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",559,572,3.9
+eil76(538),"RL+GA, Method=double_q_learning_rl, Gamma=0.01, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",559,578,3.9
+eil76(538),"RL+GA, Method=double_q_learning_rl, Gamma=0.15, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",575,590,6.9
+eil76(538),"RL+GA, Method=double_q_learning_rl, Gamma=0.15, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",569,587,5.8
+eil76(538),"RL+GA, Method=double_q_learning_rl, Gamma=0.3, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",570,594,5.9
+eil76(538),"RL+GA, Method=double_q_learning_rl, Gamma=0.3, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",570,599,5.9
+eil76(538),"RL+GA, Method=q_learning_rl, Gamma=0.01, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",559,572,3.9
+eil76(538),"RL+GA, Method=q_learning_rl, Gamma=0.01, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",559,578,3.9
+eil76(538),"RL+GA, Method=q_learning_rl, Gamma=0.15, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",575,590,6.9
+eil76(538),"RL+GA, Method=q_learning_rl, Gamma=0.15, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",569,587,5.8
+eil76(538),"RL+GA, Method=q_learning_rl, Gamma=0.3, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",570,594,5.9
+eil76(538),"RL+GA, Method=q_learning_rl, Gamma=0.3, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",570,599,5.9
+eil76(538),"RL+GA, Method=sarsa_rl, Gamma=0.01, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",565,582,5.0
+eil76(538),"RL+GA, Method=sarsa_rl, Gamma=0.01, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",569,584,5.8
+eil76(538),"RL+GA, Method=sarsa_rl, Gamma=0.15, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",564,577,4.8
+eil76(538),"RL+GA, Method=sarsa_rl, Gamma=0.15, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",569,576,5.8
+eil76(538),"RL+GA, Method=sarsa_rl, Gamma=0.3, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",568,584,5.6
+eil76(538),"RL+GA, Method=sarsa_rl, Gamma=0.3, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",571,582,6.1
+eil76(538),"RL, Method=double_q_learning, Gamma=0.01, Reward=1, Epsilon=1",586,659,8.9
+eil76(538),"RL, Method=double_q_learning, Gamma=0.15, Reward=1, Epsilon=1",605,671,12.5
+eil76(538),"RL, Method=double_q_learning, Gamma=0.3, Reward=1, Epsilon=1",618,696,14.9
+eil76(538),"RL, Method=q_learning, Gamma=0.01, Reward=1, Epsilon=1",586,659,8.9
+eil76(538),"RL, Method=q_learning, Gamma=0.15, Reward=1, Epsilon=1",605,671,12.5
+eil76(538),"RL, Method=q_learning, Gamma=0.3, Reward=1, Epsilon=1",618,696,14.9
+eil76(538),"RL, Method=sarsa, Gamma=0.01, Reward=1, Epsilon=1",594,651,10.4
+eil76(538),"RL, Method=sarsa, Gamma=0.15, Reward=1, Epsilon=1",589,661,9.5
+eil76(538),"RL, Method=sarsa, Gamma=0.3, Reward=1, Epsilon=1",598,671,11.2
+kroA100(21282),"GA, Elitist, Pop=100, Mut=0.01.",31195,37031,46.6
+kroA100(21282),"GA, Roulette, Pop=100, Mut=0.01.",51172,62268,140.4
+kroA100(21282),"RL+GA, Method=double_q_learning_rl, Gamma=0.01, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",22890,23583,7.6
+kroA100(21282),"RL+GA, Method=double_q_learning_rl, Gamma=0.01, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",22469,23283,5.6
+kroA100(21282),"RL+GA, Method=double_q_learning_rl, Gamma=0.15, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",24610,27088,15.6
+kroA100(21282),"RL+GA, Method=double_q_learning_rl, Gamma=0.15, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",25490,27035,19.8
+kroA100(21282),"RL+GA, Method=double_q_learning_rl, Gamma=0.3, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",25974,29200,22.0
+kroA100(21282),"RL+GA, Method=double_q_learning_rl, Gamma=0.3, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",24827,29133,16.7
+kroA100(21282),"RL+GA, Method=q_learning_rl, Gamma=0.01, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",22890,23583,7.6
+kroA100(21282),"RL+GA, Method=q_learning_rl, Gamma=0.01, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",22469,23283,5.6
+kroA100(21282),"RL+GA, Method=q_learning_rl, Gamma=0.15, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",24610,27088,15.6
+kroA100(21282),"RL+GA, Method=q_learning_rl, Gamma=0.15, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",25490,27035,19.8
+kroA100(21282),"RL+GA, Method=q_learning_rl, Gamma=0.3, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",25974,29200,22.0
+kroA100(21282),"RL+GA, Method=q_learning_rl, Gamma=0.3, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",24827,29133,16.7
+kroA100(21282),"RL+GA, Method=sarsa_rl, Gamma=0.01, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",23077,24002,8.4
+kroA100(21282),"RL+GA, Method=sarsa_rl, Gamma=0.01, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",22946,23704,7.8
+kroA100(21282),"RL+GA, Method=sarsa_rl, Gamma=0.15, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",23882,25188,12.2
+kroA100(21282),"RL+GA, Method=sarsa_rl, Gamma=0.15, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",24182,24976,13.6
+kroA100(21282),"RL+GA, Method=sarsa_rl, Gamma=0.3, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",25447,27210,19.6
+kroA100(21282),"RL+GA, Method=sarsa_rl, Gamma=0.3, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",25638,27206,20.5
+kroA100(21282),"RL, Method=double_q_learning, Gamma=0.01, Reward=1, Epsilon=1",24482,27169,15.0
+kroA100(21282),"RL, Method=double_q_learning, Gamma=0.15, Reward=1, Epsilon=1",29519,32837,38.7
+kroA100(21282),"RL, Method=double_q_learning, Gamma=0.3, Reward=1, Epsilon=1",31882,36366,49.8
+kroA100(21282),"RL, Method=q_learning, Gamma=0.01, Reward=1, Epsilon=1",24482,27169,15.0
+kroA100(21282),"RL, Method=q_learning, Gamma=0.15, Reward=1, Epsilon=1",29519,32837,38.7
+kroA100(21282),"RL, Method=q_learning, Gamma=0.3, Reward=1, Epsilon=1",31882,36366,49.8
+kroA100(21282),"RL, Method=sarsa, Gamma=0.01, Reward=1, Epsilon=1",24614,27275,15.7
+kroA100(21282),"RL, Method=sarsa, Gamma=0.15, Reward=1, Epsilon=1",25957,30757,22.0
+kroA100(21282),"RL, Method=sarsa, Gamma=0.3, Reward=1, Epsilon=1",28509,33480,34.0
+pr107(44303),"GA, Elitist, Pop=100, Mut=0.01.",69290,83271,56.4
+pr107(44303),"GA, Roulette, Pop=100, Mut=0.01.",110227,146872,148.8
+pr107(44303),"RL+GA, Method=double_q_learning_rl, Gamma=0.01, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",45991,46701,3.8
+pr107(44303),"RL+GA, Method=double_q_learning_rl, Gamma=0.01, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",45844,46853,3.5
+pr107(44303),"RL+GA, Method=double_q_learning_rl, Gamma=0.15, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",47226,48408,6.6
+pr107(44303),"RL+GA, Method=double_q_learning_rl, Gamma=0.15, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",46698,47491,5.4
+pr107(44303),"RL+GA, Method=double_q_learning_rl, Gamma=0.3, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",49908,52610,12.7
+pr107(44303),"RL+GA, Method=double_q_learning_rl, Gamma=0.3, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",50331,52718,13.6
+pr107(44303),"RL+GA, Method=q_learning_rl, Gamma=0.01, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",45991,46701,3.8
+pr107(44303),"RL+GA, Method=q_learning_rl, Gamma=0.01, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",45844,46853,3.5
+pr107(44303),"RL+GA, Method=q_learning_rl, Gamma=0.15, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",47226,48408,6.6
+pr107(44303),"RL+GA, Method=q_learning_rl, Gamma=0.15, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",46698,47491,5.4
+pr107(44303),"RL+GA, Method=q_learning_rl, Gamma=0.3, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",49908,52610,12.7
+pr107(44303),"RL+GA, Method=q_learning_rl, Gamma=0.3, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",50331,52718,13.6
+pr107(44303),"RL+GA, Method=sarsa_rl, Gamma=0.01, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",45982,46965,3.8
+pr107(44303),"RL+GA, Method=sarsa_rl, Gamma=0.01, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",45738,46721,3.2
+pr107(44303),"RL+GA, Method=sarsa_rl, Gamma=0.15, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",46894,47739,5.8
+pr107(44303),"RL+GA, Method=sarsa_rl, Gamma=0.15, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",46263,47102,4.4
+pr107(44303),"RL+GA, Method=sarsa_rl, Gamma=0.3, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",46748,48163,5.5
+pr107(44303),"RL+GA, Method=sarsa_rl, Gamma=0.3, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",46433,47594,4.8
+pr107(44303),"RL, Method=double_q_learning, Gamma=0.01, Reward=1, Epsilon=1",48462,54958,9.4
+pr107(44303),"RL, Method=double_q_learning, Gamma=0.15, Reward=1, Epsilon=1",49351,58785,11.4
+pr107(44303),"RL, Method=double_q_learning, Gamma=0.3, Reward=1, Epsilon=1",54476,64301,23.0
+pr107(44303),"RL, Method=q_learning, Gamma=0.01, Reward=1, Epsilon=1",48462,54958,9.4
+pr107(44303),"RL, Method=q_learning, Gamma=0.15, Reward=1, Epsilon=1",49351,58785,11.4
+pr107(44303),"RL, Method=q_learning, Gamma=0.3, Reward=1, Epsilon=1",54476,64301,23.0
+pr107(44303),"RL, Method=sarsa, Gamma=0.01, Reward=1, Epsilon=1",48769,54187,10.1
+pr107(44303),"RL, Method=sarsa, Gamma=0.15, Reward=1, Epsilon=1",48795,57051,10.1
+pr107(44303),"RL, Method=sarsa, Gamma=0.3, Reward=1, Epsilon=1",49431,60270,11.6
+st70(675),"GA, Elitist, Pop=100, Mut=0.01.",785,899,16.4
+st70(675),"GA, Roulette, Pop=100, Mut=0.01.",1059,1244,56.9
+st70(675),"RL+GA, Method=double_q_learning_rl, Gamma=0.01, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",708,739,4.9
+st70(675),"RL+GA, Method=double_q_learning_rl, Gamma=0.01, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",717,742,6.2
+st70(675),"RL+GA, Method=double_q_learning_rl, Gamma=0.15, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",724,772,7.3
+st70(675),"RL+GA, Method=double_q_learning_rl, Gamma=0.15, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",722,770,7.0
+st70(675),"RL+GA, Method=double_q_learning_rl, Gamma=0.3, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",755,811,11.9
+st70(675),"RL+GA, Method=double_q_learning_rl, Gamma=0.3, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",742,793,9.9
+st70(675),"RL+GA, Method=q_learning_rl, Gamma=0.01, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",708,739,4.9
+st70(675),"RL+GA, Method=q_learning_rl, Gamma=0.01, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",717,742,6.2
+st70(675),"RL+GA, Method=q_learning_rl, Gamma=0.15, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",724,772,7.3
+st70(675),"RL+GA, Method=q_learning_rl, Gamma=0.15, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",722,770,7.0
+st70(675),"RL+GA, Method=q_learning_rl, Gamma=0.3, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",755,811,11.9
+st70(675),"RL+GA, Method=q_learning_rl, Gamma=0.3, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",742,793,9.9
+st70(675),"RL+GA, Method=sarsa_rl, Gamma=0.01, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",708,738,4.9
+st70(675),"RL+GA, Method=sarsa_rl, Gamma=0.01, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",715,742,5.9
+st70(675),"RL+GA, Method=sarsa_rl, Gamma=0.15, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",708,746,4.9
+st70(675),"RL+GA, Method=sarsa_rl, Gamma=0.15, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",716,742,6.1
+st70(675),"RL+GA, Method=sarsa_rl, Gamma=0.3, Reward=1, Epsilon=1, Elitist, Pop=40, Mut=0.01.",732,769,8.4
+st70(675),"RL+GA, Method=sarsa_rl, Gamma=0.3, Reward=1, Epsilon=1, Roulette, Pop=40, Mut=0.01.",722,763,7.0
+st70(675),"RL, Method=double_q_learning, Gamma=0.01, Reward=1, Epsilon=1",776,822,15.0
+st70(675),"RL, Method=double_q_learning, Gamma=0.15, Reward=1, Epsilon=1",817,925,21.0
+st70(675),"RL, Method=double_q_learning, Gamma=0.3, Reward=1, Epsilon=1",886,1012,31.3
+st70(675),"RL, Method=q_learning, Gamma=0.01, Reward=1, Epsilon=1",776,822,15.0
+st70(675),"RL, Method=q_learning, Gamma=0.15, Reward=1, Epsilon=1",817,925,21.0
+st70(675),"RL, Method=q_learning, Gamma=0.3, Reward=1, Epsilon=1",886,1012,31.3
+st70(675),"RL, Method=sarsa, Gamma=0.01, Reward=1, Epsilon=1",767,823,13.6
+st70(675),"RL, Method=sarsa, Gamma=0.15, Reward=1, Epsilon=1",770,890,14.1
+st70(675),"RL, Method=sarsa, Gamma=0.3, Reward=1, Epsilon=1",826,940,22.4
