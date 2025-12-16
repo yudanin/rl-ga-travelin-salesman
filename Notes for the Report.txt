@@ -1,9 +1,0 @@
-Notes for section  Conclusion and Future Work
-
-- The paradigm of Ruan et al. where we first use reinforcement learning and then proceed with the genetic algorithm to improve the trajectory formed by RL gets the evolution backwards.
-
-- If we look at biological evolution, we would see that it evolves both traits and capacities (see a survey in Yudanin, 2020). Here, traits are organism's characteristics that work as is, contribute to survival by virtue of their existence. Wings, fur, bipedalism, and opposable thumbs can serve as examples. However, at its higher reaches, evolution gives rise to capacities thatg can be utilized for multiple purposes, for informing and planning actions carried out thanks for traits. Vision and hearing, central integration of sensory inputs, theories of mind, and, ultimately, discursive intelligence are but a few examples.
-
-- In the traveling salesman problems, a path is akin to traits - it is static and can be evaluated for optimality. The ability to find a better route is similar to a capacity. 
-
-- Thus, if we want to follow the example of biological evolution, we would switch the order in Ruyan at al. First, we need to evolve a bunch of paths. Then, we need to assign to agents different kinds of reinfiorcement learning capacities, or algorithms, have them apply these, and compare the paths they generate. We can even continue the evolutionary development by allowing the agents to crossover and mutate their RL capacities, e.g., discount rates and alpha.    
